@@ -1,7 +1,7 @@
 import re
 import pytest
 
-from pyra import relations
+from pyra import column, relations
 
 
 @pytest.mark.parametrize(
@@ -165,4 +165,51 @@ def test_relation():
 )
 def test_relations_eq(r1: relations.Relation, r2: relations.Relation, want: bool):
     actual = r1 == r2
+    assert want == actual
+
+
+def test_relation_selection():
+    sch = {
+        "id": relations.Integer(),
+        "letter": relations.String(),
+        "float": relations.Float(),
+        "letter2": relations.String(),
+    }
+    r = relations.Relation(
+        [
+            (1, "a", 45.5, "x"),
+            (2, "b", 87.0, "b"),
+            (2, "a", 9.8, "y"),
+        ],
+        sch,
+    )
+    actual = r.selection(column.Column("letter") == column.Column("letter2"))
+    want = relations.Relation(
+        [
+            (2, "b", 87.0, "b"),
+        ],
+        sch,
+    )
+    assert want == actual
+    a = column.Column("id") == 2
+    print(a)
+    actual = r.selection(column.Column("id") == 2)
+    want = relations.Relation(
+        [
+            (2, "b", 87.0, "b"),
+            (2, "a", 9.8, "y"),
+        ],
+        sch,
+    )
+    assert want == actual
+    actual = r.selection(
+        (column.Column("letter") == column.Column("letter2"))
+        & (column.Column("id") == 2)
+    )
+    want = relations.Relation(
+        [
+            (2, "b", 87.0, "b"),
+        ],
+        sch,
+    )
     assert want == actual

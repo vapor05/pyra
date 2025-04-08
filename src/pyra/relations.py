@@ -2,6 +2,8 @@ import typing
 
 from dataclasses import dataclass
 
+from pyra import column
+
 
 class DataType(typing.Protocol):
 
@@ -77,7 +79,9 @@ class Relation:
         if not schema_info.valid:
             raise Exception(f"data doesn't match schema: {schema_info.fail_info}")
 
-        self.schema = {j[0]: SchemaColumn(i, j[1]) for i, j in enumerate(schema.items())}
+        self.schema = {
+            j[0]: SchemaColumn(i, j[1]) for i, j in enumerate(schema.items())
+        }
         self._data = data
 
     def projection(self, *columns: str) -> "Relation":
@@ -88,9 +92,12 @@ class Relation:
         indexes = [self.schema[c].index for c in columns]
         new_data = [tuple([t[i] for i in indexes]) for t in self._data]
         return Relation(new_data, new_sch)
-    
-    def selection(self, *cond) -> "Relation":
-        return self
+
+    def selection(self, cond: column.Expression) -> "Relation":
+        schema_ind = {n: i for i, n in enumerate(self.schema.keys())}
+        new_data = [r for r in self._data if cond(r, schema_ind)]
+        new_schema = {c: i.data_type for c, i in self.schema.items()}
+        return Relation(new_data, new_schema)
 
     def __eq__(self, value: typing.Any):
         if not isinstance(value, Relation):

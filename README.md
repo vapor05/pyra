@@ -1,0 +1,1 @@
+A simple implementation of relational algebra in python for learning
