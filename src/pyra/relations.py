@@ -9,6 +9,8 @@ class DataType(typing.Protocol):
 
     def is_type(self, data: typing.Any) -> bool: ...
 
+    def cast(self, data: typing.Any) -> typing.Any: ...
+
     def __eq__(self, value):
         return isinstance(value, self.__class__)
 
@@ -21,17 +23,26 @@ class String(DataType):
     def is_type(self, data: typing.Any) -> bool:
         return isinstance(data, str)
 
+    def cast(self, data: typing.Any) -> str:
+        return str(data)
+
 
 class Integer(DataType):
 
     def is_type(self, data: typing.Any) -> bool:
         return isinstance(data, int)
 
+    def cast(self, data: typing.Any) -> int:
+        return int(data)
+
 
 class Float(DataType):
 
     def is_type(self, data: typing.Any) -> bool:
         return isinstance(data, float)
+
+    def cast(self, data: typing.Any) -> float:
+        return float(data)
 
 
 @dataclass(slots=True, frozen=True)
