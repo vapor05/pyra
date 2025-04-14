@@ -213,3 +213,60 @@ def test_relation_selection():
         sch,
     )
     assert want == actual
+
+
+def test_relation_join():
+    rl = relations.Relation(
+        [(1, "a", "x"), (2, "b", "y"), (3, "c", "z")],
+        schema={
+            "id": relations.Integer(),
+            "cola": relations.String(),
+            "colb": relations.String(),
+        },
+    )
+    rr = relations.Relation(
+        [(1, 10.1), (3, 30.3), (5, 50.5)],
+        schema={"id": relations.Integer(), "colc": relations.Float()},
+    )
+    want = relations.Relation(
+        [(1, "a", "x", 10.1), (3, "c", "z", 30.3)],
+        schema={
+            "id": relations.Integer(),
+            "cola": relations.String(),
+            "colb": relations.String(),
+            "colc": relations.Float(),
+        },
+    )
+    actual = rl.join(rr, "id")
+    assert want == actual
+
+
+def test_relation_join_same_columns():
+    rl = relations.Relation(
+        [(1, "a", "x"), (2, "b", "y"), (3, "c", "z")],
+        schema={
+            "id": relations.Integer(),
+            "cola": relations.String(),
+            "colb": relations.String(),
+        },
+    )
+    rr = relations.Relation(
+        [(1, 10.1, "A"), (3, 30.3, "B"), (5, 50.5, "C")],
+        schema={
+            "id": relations.Integer(),
+            "colc": relations.Float(),
+            "colb": relations.String(),
+        },
+    )
+    want = relations.Relation(
+        [(1, "a", "x", 10.1, "A"), (3, "c", "z", 30.3, "B")],
+        schema={
+            "id": relations.Integer(),
+            "cola": relations.String(),
+            "colb": relations.String(),
+            "colc": relations.Float(),
+            "colb_right": relations.String(),
+        },
+    )
+    actual = rl.join(rr, "id")
+    assert want == actual
